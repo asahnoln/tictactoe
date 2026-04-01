@@ -14,6 +14,7 @@ input_symbol :: proc(t: ^testing.T) {
 	testing.expect_value(t, g.field[1][0], 'w')
 }
 
+// TODO: Table tests
 @(test)
 input_symbol_error_out_of_bound :: proc(t: ^testing.T) {
 	g := game.game_make(2)
@@ -31,4 +32,15 @@ input_symbol_error_out_of_bound :: proc(t: ^testing.T) {
 
 	err = game.input_symbol(&g, {0, 4}, 'w')
 	testing.expect_value(t, err, game.Out_Of_Bounds_Error{p = {0, 4}, f = {2, 2}})
+}
+
+@(test)
+input_symbol_error_already_taken_cell :: proc(t: ^testing.T) {
+	g := game.game_make(4)
+	defer game.game_destroy(&g)
+
+
+	_ = game.input_symbol(&g, {2, 3}, 'o')
+	err := game.input_symbol(&g, {2, 3}, 'w')
+	testing.expect_value(t, err, game.Cell_Already_Taken_Error{p = {2, 3}, got = 'o', want = 'w'})
 }
