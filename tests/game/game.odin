@@ -1,5 +1,6 @@
 package game_test
 
+import "core:slice"
 import "core:testing"
 import "src:game"
 
@@ -42,4 +43,27 @@ input_symbol_error_already_taken_cell :: proc(t: ^testing.T) {
 	_ = game.input_symbol(&g, {2, 3}, 'o')
 	err := game.input_symbol(&g, {2, 3}, 'x')
 	testing.expect_value(t, err, game.Cell_Already_Taken_Error{p = {2, 3}, got = 'o', want = 'x'})
+}
+
+@(test)
+winner :: proc(t: ^testing.T) {
+	g := game.game_make(3)
+	defer game.game_destroy(&g)
+
+
+	// Winning row
+	g.field[1][0] = 'y'
+	g.field[1][1] = 'y'
+	g.field[1][2] = 'y'
+
+	g.field[2][0] = 'x'
+	g.field[2][1] = 'y'
+
+	w, r := game.winner(g)
+	defer delete(r)
+
+	testing.expect_value(t, w, 'y')
+
+	want_row := []game.Pos{{0, 1}, {1, 1}, {2, 1}}
+	testing.expectf(t, slice.equal(r, want_row), "got row %v; want %v", r, want_row)
 }

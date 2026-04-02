@@ -1,11 +1,16 @@
 package game
 
+Pos :: [2]int
+Size :: Pos
+
 Game :: struct {
 	field: [][]rune,
 }
 
-Pos :: [2]int
-Size :: Pos
+Winner :: struct {
+	s:   rune,
+	row: []Pos,
+}
 
 game_make :: proc(size: int, allocator := context.allocator) -> (g: Game) {
 	g.field = make([][]rune, size, allocator)
@@ -37,4 +42,21 @@ input_symbol :: proc(g: ^Game, p: Pos, s: rune) -> (err: Input_Error) {
 
 	g.field[p.y][p.x] = s
 	return
+}
+
+winner :: proc(g: Game) -> (w: rune, row: []Pos) {
+	row = make([]Pos, len(g.field))
+
+	for r, y in g.field {
+		for c, x in r {
+			row[x] = {x, y}
+			w = c
+		}
+
+		if row[len(row) - 1] != {0, 0} {
+			break
+		}
+	}
+
+	return w, row
 }
