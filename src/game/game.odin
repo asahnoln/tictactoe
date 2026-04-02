@@ -31,6 +31,10 @@ input_symbol :: proc(g: ^Game, p: Pos, s: rune) -> (err: Input_Error) {
 		return Out_Of_Bounds_Error{p = p, f = field_size(g^)}
 	}
 
+	if got := g.field[p.y][p.x]; got != 0 {
+		return Cell_Already_Taken_Error{p = p, got = got, want = s}
+	}
+
 	g.field[p.y][p.x] = s
 	return
 }

@@ -14,24 +14,23 @@ input_symbol :: proc(t: ^testing.T) {
 	testing.expect_value(t, g.field[1][0], 'w')
 }
 
-// TODO: Table tests
 @(test)
 input_symbol_error_out_of_bound :: proc(t: ^testing.T) {
 	g := game.game_make(2)
 	defer game.game_destroy(&g)
 
+	tests := []struct {
+		p: game.Pos,
+	}{{{3, 0}}, {{0, -1}}, {{-1, 0}}, {{0, 4}}}
 
-	err := game.input_symbol(&g, {3, 0}, 'w')
-	testing.expect_value(t, err, game.Out_Of_Bounds_Error{p = {3, 0}, f = {2, 2}})
-
-	err = game.input_symbol(&g, {0, -1}, 'w')
-	testing.expect_value(t, err, game.Out_Of_Bounds_Error{p = {0, -1}, f = {2, 2}})
-
-	err = game.input_symbol(&g, {-1, 0}, 'w')
-	testing.expect_value(t, err, game.Out_Of_Bounds_Error{p = {-1, 0}, f = {2, 2}})
-
-	err = game.input_symbol(&g, {0, 4}, 'w')
-	testing.expect_value(t, err, game.Out_Of_Bounds_Error{p = {0, 4}, f = {2, 2}})
+	for tt in tests {
+		err := game.input_symbol(&g, tt.p, 'w')
+		want := game.Out_Of_Bounds_Error {
+			p = tt.p,
+			f = {2, 2},
+		}
+		testing.expectf(t, err == want, "for pos %v got err %v; want %v", tt.p, err, want)
+	}
 }
 
 @(test)
@@ -41,6 +40,6 @@ input_symbol_error_already_taken_cell :: proc(t: ^testing.T) {
 
 
 	_ = game.input_symbol(&g, {2, 3}, 'o')
-	err := game.input_symbol(&g, {2, 3}, 'w')
-	testing.expect_value(t, err, game.Cell_Already_Taken_Error{p = {2, 3}, got = 'o', want = 'w'})
+	err := game.input_symbol(&g, {2, 3}, 'x')
+	testing.expect_value(t, err, game.Cell_Already_Taken_Error{p = {2, 3}, got = 'o', want = 'x'})
 }
