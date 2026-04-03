@@ -44,19 +44,51 @@ input_symbol :: proc(g: ^Game, p: Pos, s: rune) -> (err: Input_Error) {
 	return
 }
 
-winner :: proc(g: Game) -> (w: rune, row: []Pos) {
-	row = make([]Pos, len(g.field))
+winner :: proc(f: [][]rune) -> (w: rune, row: []Pos) {
+	row = make([]Pos, len(f))
 
-	for r, y in g.field {
-		for c, x in r {
-			row[x] = {x, y}
-			w = c
-		}
-
-		if row[len(row) - 1] != {0, 0} {
-			break
-		}
+	w = winner_row(f, &row)
+	if w == 0 {
+		w = winner_col(f, &row)
 	}
 
 	return w, row
+}
+
+winner_row :: proc(f: [][]rune, row: ^[]Pos) -> (w: rune) {
+	row_loop: for r, y in f {
+		for c, x in r {
+			if c == 0 || w != 0 && c != w {
+				w = 0
+				continue row_loop
+			}
+
+			w = c
+			row[x] = {x, y}
+		}
+
+		break
+	}
+
+	return w
+}
+
+winner_col :: proc(f: [][]rune, col: ^[]Pos) -> (w: rune) {
+	row_loop: for _, x in f[0] {
+		for r, y in f {
+			c := f[y][x]
+
+			if c == 0 || w != 0 && c != w {
+				w = 0
+				continue row_loop
+			}
+
+			w = c
+			col[y] = {x, y}
+		}
+
+		break
+	}
+
+	return w
 }

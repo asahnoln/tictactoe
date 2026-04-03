@@ -16,16 +16,17 @@ main :: proc() {
   err := game.input_symbol(&g, {0, 1}, '本')
   ...
 
-  w := game.winner(g)
-  defer delete(w.row)
-  w.s == '本'
-  w.row == {{0, 2}, {1, 2}, {2, 2}}
+  w, row := game.winner(g)
+  defer delete(row)
+  s == '本'
+  row == {{0, 2}, {1, 2}, {2, 2}}
 }
 ```
 
 - [x] Input symbol
 - [x] Input symbol check error already taken cell
 - [ ] Get winner
-- [ ] Check row
-- [ ] Check column
+- [x] Check row
+- [x] Check column
 - [ ] Check diagonal
+- [ ] Optimize search (we don't need to look at row/col/diag, if shared cell is 0)

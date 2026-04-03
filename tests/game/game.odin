@@ -47,23 +47,86 @@ input_symbol_error_already_taken_cell :: proc(t: ^testing.T) {
 
 @(test)
 winner :: proc(t: ^testing.T) {
-	g := game.game_make(3)
-	defer game.game_destroy(&g)
+	tests := []struct {
+		f:    [][]rune,
+		want: []game.Pos,
+	} {
+		{
+			{ 	//
+				{0, 0, 0},
+				{'y', 'y', 'y'},
+				{0, 'x', 'y'},
+			},
+			{{0, 1}, {1, 1}, {2, 1}},
+		},
+		{
+			{ 	//
+				{0, 'y', 0},
+				{'x', 'y', 0},
+				{'x', 'y', 'y'},
+			},
+			{{1, 0}, {1, 1}, {1, 2}},
+		},
+	}
 
+	for tt in tests {
+		w, r := game.winner(tt.f)
+		defer delete(r)
 
-	// Winning row
-	g.field[1][0] = 'y'
-	g.field[1][1] = 'y'
-	g.field[1][2] = 'y'
+		testing.expect_value(t, w, 'y')
 
-	g.field[2][0] = 'x'
-	g.field[2][1] = 'y'
+		testing.expectf(t, slice.equal(r, tt.want), "got row %v; want %v", r, tt.want)
+	}
+}
 
-	w, r := game.winner(g)
-	defer delete(r)
+@(test)
+winner_row :: proc(t: ^testing.T) {
+	row := []game.Pos{{}, {}}
+	w := game.winner_row(
+		[][]rune { 	// Field
+			{0, 0},
+			{'o', 'x'},
+			{'y', 'y'},
+			{0, 0},
+		},
+		&row,
+	)
 
 	testing.expect_value(t, w, 'y')
 
-	want_row := []game.Pos{{0, 1}, {1, 1}, {2, 1}}
-	testing.expectf(t, slice.equal(r, want_row), "got row %v; want %v", r, want_row)
+	want_row := []game.Pos{{0, 2}, {1, 2}}
+	testing.expectf(t, slice.equal(row, want_row), "got row %v; want %v", row, want_row)
+}
+@(test)
+winner_col :: proc(t: ^testing.T) {
+	col := []game.Pos{{}, {}}
+	w := game.winner_col(
+		[][]rune { 	// Field
+			{0, 'y', 'x', 0},
+			{0, 'y', 'o', 0},
+		},
+		&col,
+	)
+
+	testing.expect_value(t, w, 'y')
+
+	want_col := []game.Pos{{1, 0}, {1, 1}}
+	testing.expectf(t, slice.equal(col, want_col), "got col %v; want %v", col, want_col)
+}
+
+@(test)
+winner_diag :: proc(t: ^testing.T) {
+	diag := []game.Pos{{}, {}}
+	w := game.winner_diag(
+		[][]rune { 	// Field
+			{0, 'y'},
+			{'y', 0},
+		},
+		&diag,
+	)
+
+	testing.expect_value(t, w, 'y')
+
+	want_diag := []game.Pos{{1, 0}, {0, 1}}
+	testing.expectf(t, slice.equal(diag, want_diag), "got diag %v; want %v", diag, want_diag)
 }
