@@ -25,8 +25,9 @@ main :: proc() {
 
 - [x] Input symbol
 - [x] Input symbol check error already taken cell
-- [ ] Get winner
+- [x] Get winner
 - [x] Check row
 - [x] Check column
-- [ ] Check diagonal
+- [x] Check diagonal
+- [ ] Refactor for simpler row/col check
 - [ ] Optimize search (we don't need to look at row/col/diag, if shared cell is 0)

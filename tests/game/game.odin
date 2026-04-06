@@ -67,6 +67,14 @@ winner :: proc(t: ^testing.T) {
 			},
 			{{1, 0}, {1, 1}, {1, 2}},
 		},
+		{
+			{ 	//
+				{'y', 0, 0},
+				{'x', 'y', 0},
+				{'x', 0, 'y'},
+			},
+			{{0, 0}, {1, 1}, {2, 2}},
+		},
 	}
 
 	for tt in tests {
@@ -116,17 +124,53 @@ winner_col :: proc(t: ^testing.T) {
 
 @(test)
 winner_diag :: proc(t: ^testing.T) {
-	diag := []game.Pos{{}, {}}
+	diag := []game.Pos{{}, {}, {}}
 	w := game.winner_diag(
 		[][]rune { 	// Field
-			{0, 'y'},
-			{'y', 0},
+			{'y', 0, 0},
+			{0, 'y', 0},
+			{0, 0, 'y'},
 		},
 		&diag,
 	)
 
 	testing.expect_value(t, w, 'y')
 
-	want_diag := []game.Pos{{1, 0}, {0, 1}}
+	want_diag := []game.Pos{{0, 0}, {1, 1}, {2, 2}}
 	testing.expectf(t, slice.equal(diag, want_diag), "got diag %v; want %v", diag, want_diag)
+}
+
+@(test)
+winner_diag_rev :: proc(t: ^testing.T) {
+	diag := []game.Pos{{}, {}, {}, {}}
+	w := game.winner_diag(
+		[][]rune { 	// Field
+			{0, 0, 0, 'y'},
+			{0, 0, 'y', 0},
+			{0, 'y', 0, 0},
+			{'y', 0, 0, 0},
+		},
+		&diag,
+	)
+
+	testing.expect_value(t, w, 'y')
+
+	want_diag := []game.Pos{{3, 0}, {2, 1}, {1, 2}, {0, 3}}
+	testing.expectf(t, slice.equal(diag, want_diag), "got diag %v; want %v", diag, want_diag)
+}
+
+@(test)
+winner_diag_zero :: proc(t: ^testing.T) {
+	diag := []game.Pos{{}, {}, {}, {}}
+	w := game.winner_diag(
+		[][]rune { 	// Field
+			{0, 0, 0, 'y'},
+			{0, 'y', 0, 0},
+			{0, 'y', 0, 0},
+			{0, 0, 0, 0},
+		},
+		&diag,
+	)
+
+	testing.expect_value(t, w, 0)
 }

@@ -7,11 +7,6 @@ Game :: struct {
 	field: [][]rune,
 }
 
-Winner :: struct {
-	s:   rune,
-	row: []Pos,
-}
-
 game_make :: proc(size: int, allocator := context.allocator) -> (g: Game) {
 	g.field = make([][]rune, size, allocator)
 	for i in 0 ..< size {
@@ -51,10 +46,14 @@ winner :: proc(f: [][]rune) -> (w: rune, row: []Pos) {
 	if w == 0 {
 		w = winner_col(f, &row)
 	}
+	if w == 0 {
+		w = winner_diag(f, &row)
+	}
 
 	return w, row
 }
 
+// TODO: Simpler check refactor
 winner_row :: proc(f: [][]rune, row: ^[]Pos) -> (w: rune) {
 	row_loop: for r, y in f {
 		for c, x in r {
@@ -74,13 +73,13 @@ winner_row :: proc(f: [][]rune, row: ^[]Pos) -> (w: rune) {
 }
 
 winner_col :: proc(f: [][]rune, col: ^[]Pos) -> (w: rune) {
-	row_loop: for _, x in f[0] {
+	col_loop: for _, x in f[0] {
 		for r, y in f {
 			c := f[y][x]
 
 			if c == 0 || w != 0 && c != w {
 				w = 0
-				continue row_loop
+				continue col_loop
 			}
 
 			w = c
@@ -91,4 +90,28 @@ winner_col :: proc(f: [][]rune, col: ^[]Pos) -> (w: rune) {
 	}
 
 	return w
+}
+
+winner_diag :: proc(f: [][]rune, col: ^[]Pos) -> (w: rune) {
+	has_diag := true
+	has_diag_rev := true
+	max_x := len(f) - 1
+	for _, y in f {
+		has_diag = has_diag && f[0][0] != 0 && f[0][0] == f[y][y]
+		has_diag_rev = has_diag_rev && f[0][max_x] != 0 && f[0][max_x] == f[y][max_x - y]
+
+		if !has_diag && !has_diag_rev {
+			return
+		}
+	}
+
+	if has_diag {
+		max_x = 0
+	}
+
+	for _, y in f {
+		col[y] = {abs(max_x - y), y}
+	}
+
+	return f[0][max_x]
 }
